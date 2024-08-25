@@ -1,13 +1,12 @@
 # Data Science
-NumPy~=1.21.2
-Pandas~=1.3.3
-Matplotlib~=3.4.3
+numpy
+pandas
+matplotlib
 
 # Machine Learning
-Scikit-learn~=0.24.2
-TensorFlow~=2.6.0
-PyTorch~=1.9.0
+scikit-learn
+tensorflow
+torch
 
-# Python 3.12 support
 # Testing
-Pytest~=6.2.5
+pytest
