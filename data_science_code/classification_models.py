@@ -2,7 +2,41 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 import pandas as pd
+from sklearn.naive_bayes import GaussianNB
 
+
+class NaiveBayesModel:
+    def __init__(self, **kwargs):
+        """
+        Initializes the NaiveBayesModel class with optional parameters.
+
+        Parameters:
+        - kwargs: Additional arguments to pass to the GaussianNB model.
+        """
+        self.model = GaussianNB(**kwargs)
+
+    def train(self, X, y):
+        """
+        Trains the Naive Bayes model using the provided dataset.
+
+        Parameters:
+        - X: Features (numpy array or pandas DataFrame).
+        - y: Target variable (numpy array or pandas Series).
+        """
+        self.model.fit(X, y)
+
+    def predict(self, X):
+        """
+        Predicts the target variable for the given features.
+
+        Parameters:
+        - X: Features to predict the target variable for.
+
+        Returns:
+        - Predicted target variable (numpy array).
+        """
+        return self.model.predict(X)
+    
 
 class LogisticRegressionModel:
     def __init__(self, random_state=None, **kwargs):
