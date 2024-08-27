@@ -4,6 +4,92 @@ from sklearn.model_selection import GridSearchCV
 import pandas as pd
 from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
+from sklearn.ensemble import GradientBoostingClassifier
+
+
+class GBMModel:
+    def __init__(self, random_state=None, **kwargs):
+        """
+        Initializes the GBMModel class with optional parameters.
+
+        Parameters:
+        - random_state: Seed for random number generation.
+        - kwargs: Additional arguments to pass to the GradientBoostingClassifier model.
+        """
+        self.model = GradientBoostingClassifier(random_state=random_state, **kwargs)
+        self.random_state = random_state
+
+    def train(self, X, y):
+        """
+        Trains the GBM model using the provided dataset.
+
+        Parameters:
+        - X: Features (numpy array or pandas DataFrame).
+        - y: Target variable (numpy array or pandas Series).
+        """
+        self.model.fit(X, y)
+
+    def predict(self, X):
+        """
+        Predicts the target variable for the given features.
+
+        Parameters:
+        - X: Features to predict the target variable for.
+
+        Returns:
+        - Predicted target variable (numpy array).
+        """
+        return self.model.predict(X)
+
+    def predict_proba(self, X):
+        """
+        Predicts the probability of the target variable for the given features.
+
+        Parameters:
+        - X: Features to predict the target variable probabilities for.
+
+        Returns:
+        - Predicted probabilities (numpy array).
+        """
+        return self.model.predict_proba(X)
+
+    def set_params(self, **params):
+        """
+        Sets the parameters of the GBM model.
+
+        Parameters:
+        - params: Dictionary of parameters to set.
+        """
+        self.model.set_params(**params)
+
+    def get_params(self):
+        """
+        Gets the parameters of the GBM model.
+
+        Returns:
+        - params: Dictionary of the model's parameters.
+        """
+        return self.model.get_params()
+
+    def tune_hyperparameters(self, X, y, param_grid, cv=5, scoring='accuracy', n_jobs=-1):
+        """
+        Tunes the hyperparameters of the GBM model using GridSearchCV.
+
+        Parameters:
+        - X: Features (numpy array or pandas DataFrame).
+        - y: Target variable (numpy array or pandas Series).
+        - param_grid: Dictionary with parameters names (`str`) as keys and lists of parameter settings to try as values.
+        - cv: Number of cross-validation folds (default is 5).
+        - scoring: Scoring metric to use for evaluating the model (default is 'accuracy').
+        - n_jobs: Number of jobs to run in parallel during GridSearchCV (default is -1, which uses all processors).
+
+        Returns:
+        - best_params_: Best parameters found by GridSearchCV.
+        """
+        grid_search = GridSearchCV(estimator=self.model, param_grid=param_grid, cv=cv, scoring=scoring, n_jobs=n_jobs)
+        grid_search.fit(X, y)
+        self.model = grid_search.best_estimator_
+        return grid_search.best_params_
 
 
 class SVMModel:
