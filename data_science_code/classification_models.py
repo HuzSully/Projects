@@ -64,7 +64,7 @@ class LogisticRegressionModel:
         - params: Dictionary of the model's parameters.
         """
         return self.model.get_params()
-    
+
 
 class RandomForestModel:
     def __init__(self, random_state=None, **kwargs):
@@ -77,6 +77,7 @@ class RandomForestModel:
         """
         self.model = RandomForestClassifier(random_state=random_state, **kwargs)
         self.random_state = random_state
+        self.feature_names = None  # To store feature names after training
 
     def train(self, X, y):
         """
@@ -86,6 +87,11 @@ class RandomForestModel:
         - X: Features (numpy array or pandas DataFrame).
         - y: Target variable (numpy array or pandas Series).
         """
+        if isinstance(X, pd.DataFrame):
+            self.feature_names = X.columns.tolist()
+        else:
+            self.feature_names = [f'Feature {i}' for i in range(X.shape[1])]
+        
         self.model.fit(X, y)
 
     def predict(self, X):
@@ -102,12 +108,22 @@ class RandomForestModel:
 
     def get_feature_importances(self):
         """
-        Returns the feature importances of the random forest model.
+        Returns the feature importances of the random forest model as a sorted DataFrame.
 
         Returns:
-        - feature_importances_: Feature importances of the model.
+        - feature_importances_df: DataFrame with feature names and their importances, sorted by importance.
         """
-        return self.model.feature_importances_
+        importances = self.model.feature_importances_
+        
+        feature_importances_df = pd.DataFrame({
+            'Feature': self.feature_names,
+            'Importance': importances
+        })
+        
+        # Sort by importance in descending order
+        feature_importances_df = feature_importances_df.sort_values(by='Importance', ascending=False).reset_index(drop=True)
+        
+        return feature_importances_df
 
     def set_params(self, **params):
         """
