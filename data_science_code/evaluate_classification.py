@@ -58,7 +58,7 @@ class ClassificationEvaluator:
         for model_name in self.models:
             metrics = self.evaluate_model(model_name)
             results.append(metrics)
-        return pd.DataFrame(results)
+        return pd.DataFrame(results).sort_values('F1 Score', ascending=False)
 
 # Example usage:
 # y_true = [0, 1, 0, 1]

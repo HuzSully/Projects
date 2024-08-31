@@ -1,10 +1,525 @@
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression, SGDClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, AdaBoostClassifier
 from sklearn.model_selection import GridSearchCV
-import pandas as pd
 from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
-from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis, LinearDiscriminantAnalysis
+from sklearn.neural_network import MLPClassifier
+from xgboost import XGBClassifier
+import pandas as pd
+
+classification_models = ['Classification Models: ''GBMModel', 'SVMModel', 'NaiveBayesModel', 'LogisticRegressionModel', 'RandomForestModel'
+                         ,'KNNModel', 'AdaBoostModel', 'QDAModel', 'LDAModel', 'XGBoostModel', 'NeuralNetworkModel']
+for model in classification_models:
+    print(model)
+    
+
+class NeuralNetworkModel:
+    def __init__(self, random_state=None, **kwargs):
+        """
+        Initializes the NeuralNetworkModel class with optional parameters.
+
+        Parameters:
+        - random_state: Seed for random number generation.
+        - kwargs: Additional arguments to pass to the MLPClassifier model.
+        """
+        self.model = MLPClassifier(random_state=random_state, **kwargs)
+        self.random_state = random_state
+
+    def train(self, X, y):
+        """
+        Trains the neural network model using the provided dataset.
+
+        Parameters:
+        - X: Features (numpy array or pandas DataFrame).
+        - y: Target variable (numpy array or pandas Series).
+        """
+        self.model.fit(X, y)
+
+    def predict(self, X):
+        """
+        Predicts the target variable for the given features.
+
+        Parameters:
+        - X: Features to predict the target variable for.
+
+        Returns:
+        - Predicted target variable (numpy array).
+        """
+        return self.model.predict(X)
+
+    def predict_proba(self, X):
+        """
+        Predicts the probability of the target variable for the given features.
+
+        Parameters:
+        - X: Features to predict the target variable probabilities for.
+
+        Returns:
+        - Predicted probabilities (numpy array).
+        """
+        return self.model.predict_proba(X)
+
+    def set_params(self, **params):
+        """
+        Sets the parameters of the neural network model.
+
+        Parameters:
+        - params: Dictionary of parameters to set.
+        """
+        self.model.set_params(**params)
+
+    def get_params(self):
+        """
+        Gets the parameters of the neural network model.
+
+        Returns:
+        - params: Dictionary of the model's parameters.
+        """
+        return self.model.get_params()
+
+    def tune_hyperparameters(self, X, y, param_grid, cv=5, scoring='accuracy', n_jobs=-1):
+        """
+        Tunes the hyperparameters of the neural network model using GridSearchCV.
+
+        Parameters:
+        - X: Features (numpy array or pandas DataFrame).
+        - y: Target variable (numpy array or pandas Series).
+        - param_grid: Dictionary with parameters names (`str`) as keys and lists of parameter settings to try as values.
+        - cv: Number of cross-validation folds (default is 5).
+        - scoring: Scoring metric to use for evaluating the model (default is 'accuracy').
+        - n_jobs: Number of jobs to run in parallel during GridSearchCV (default is -1, which uses all processors).
+
+        Returns:
+        - best_params_: Best parameters found by GridSearchCV.
+        """
+        grid_search = GridSearchCV(estimator=self.model, param_grid=param_grid, cv=cv, scoring=scoring, n_jobs=n_jobs)
+        grid_search.fit(X, y)
+        self.model = grid_search.best_estimator_
+        return grid_search.best_params_
+
+
+
+class XGBoostModel:
+    def __init__(self, random_state=None, **kwargs):
+        """
+        Initializes the XGBoostModel class with optional parameters.
+
+        Parameters:
+        - random_state: Seed for random number generation.
+        - kwargs: Additional arguments to pass to the XGBClassifier model.
+        """
+        self.model = XGBClassifier(random_state=random_state, **kwargs)
+        self.random_state = random_state
+
+    def train(self, X, y):
+        """
+        Trains the XGBoost model using the provided dataset.
+
+        Parameters:
+        - X: Features (numpy array or pandas DataFrame).
+        - y: Target variable (numpy array or pandas Series).
+        """
+        self.model.fit(X, y)
+
+    def predict(self, X):
+        """
+        Predicts the target variable for the given features.
+
+        Parameters:
+        - X: Features to predict the target variable for.
+
+        Returns:
+        - Predicted target variable (numpy array).
+        """
+        return self.model.predict(X)
+
+    def predict_proba(self, X):
+        """
+        Predicts the probability of the target variable for the given features.
+
+        Parameters:
+        - X: Features to predict the target variable probabilities for.
+
+        Returns:
+        - Predicted probabilities (numpy array).
+        """
+        return self.model.predict_proba(X)
+
+    def set_params(self, **params):
+        """
+        Sets the parameters of the XGBoost model.
+
+        Parameters:
+        - params: Dictionary of parameters to set.
+        """
+        self.model.set_params(**params)
+
+    def get_params(self):
+        """
+        Gets the parameters of the XGBoost model.
+
+        Returns:
+        - params: Dictionary of the model's parameters.
+        """
+        return self.model.get_params()
+
+    def tune_hyperparameters(self, X, y, param_grid, cv=5, scoring='accuracy', n_jobs=-1):
+        """
+        Tunes the hyperparameters of the XGBoost model using GridSearchCV.
+
+        Parameters:
+        - X: Features (numpy array or pandas DataFrame).
+        - y: Target variable (numpy array or pandas Series).
+        - param_grid: Dictionary with parameters names (`str`) as keys and lists of parameter settings to try as values.
+        - cv: Number of cross-validation folds (default is 5).
+        - scoring: Scoring metric to use for evaluating the model (default is 'accuracy').
+        - n_jobs: Number of jobs to run in parallel during GridSearchCV (default is -1, which uses all processors).
+
+        Returns:
+        - best_params_: Best parameters found by GridSearchCV.
+        """
+        grid_search = GridSearchCV(estimator=self.model, param_grid=param_grid, cv=cv, scoring=scoring, n_jobs=n_jobs)
+        grid_search.fit(X, y)
+        self.model = grid_search.best_estimator_
+        return grid_search.best_params_
+
+
+
+class LDAModel:
+    def __init__(self, **kwargs):
+        """
+        Initializes the LDAModel class with optional parameters.
+
+        Parameters:
+        - kwargs: Additional arguments to pass to the LinearDiscriminantAnalysis model.
+        """
+        self.model = LinearDiscriminantAnalysis(**kwargs)
+
+    def train(self, X, y):
+        """
+        Trains the LDA model using the provided dataset.
+
+        Parameters:
+        - X: Features (numpy array or pandas DataFrame).
+        - y: Target variable (numpy array or pandas Series).
+        """
+        self.model.fit(X, y)
+
+    def predict(self, X):
+        """
+        Predicts the target variable for the given features.
+
+        Parameters:
+        - X: Features to predict the target variable for.
+
+        Returns:
+        - Predicted target variable (numpy array).
+        """
+        return self.model.predict(X)
+
+    def predict_proba(self, X):
+        """
+        Predicts the probability of the target variable for the given features.
+
+        Parameters:
+        - X: Features to predict the target variable probabilities for.
+
+        Returns:
+        - Predicted probabilities (numpy array).
+        """
+        return self.model.predict_proba(X)
+
+    def set_params(self, **params):
+        """
+        Sets the parameters of the LDA model.
+
+        Parameters:
+        - params: Dictionary of parameters to set.
+        """
+        self.model.set_params(**params)
+
+    def get_params(self):
+        """
+        Gets the parameters of the LDA model.
+
+        Returns:
+        - params: Dictionary of the model's parameters.
+        """
+        return self.model.get_params()
+
+    def tune_hyperparameters(self, X, y, param_grid, cv=5, scoring='accuracy', n_jobs=-1):
+        """
+        Tunes the hyperparameters of the LDA model using GridSearchCV.
+
+        Parameters:
+        - X: Features (numpy array or pandas DataFrame).
+        - y: Target variable (numpy array or pandas Series).
+        - param_grid: Dictionary with parameters names (`str`) as keys and lists of parameter settings to try as values.
+        - cv: Number of cross-validation folds (default is 5).
+        - scoring: Scoring metric to use for evaluating the model (default is 'accuracy').
+        - n_jobs: Number of jobs to run in parallel during GridSearchCV (default is -1, which uses all processors).
+
+        Returns:
+        - best_params_: Best parameters found by GridSearchCV.
+        """
+        grid_search = GridSearchCV(estimator=self.model, param_grid=param_grid, cv=cv, scoring=scoring, n_jobs=n_jobs)
+        grid_search.fit(X, y)
+        self.model = grid_search.best_estimator_
+        return grid_search.best_params_
+
+
+
+class QDAModel:
+    def __init__(self, **kwargs):
+        """
+        Initializes the QDAModel class with optional parameters.
+
+        Parameters:
+        - kwargs: Additional arguments to pass to the QuadraticDiscriminantAnalysis model.
+        """
+        self.model = QuadraticDiscriminantAnalysis(**kwargs)
+
+    def train(self, X, y):
+        """
+        Trains the QDA model using the provided dataset.
+
+        Parameters:
+        - X: Features (numpy array or pandas DataFrame).
+        - y: Target variable (numpy array or pandas Series).
+        """
+        self.model.fit(X, y)
+
+    def predict(self, X):
+        """
+        Predicts the target variable for the given features.
+
+        Parameters:
+        - X: Features to predict the target variable for.
+
+        Returns:
+        - Predicted target variable (numpy array).
+        """
+        return self.model.predict(X)
+
+    def predict_proba(self, X):
+        """
+        Predicts the probability of the target variable for the given features.
+
+        Parameters:
+        - X: Features to predict the target variable probabilities for.
+
+        Returns:
+        - Predicted probabilities (numpy array).
+        """
+        return self.model.predict_proba(X)
+
+    def set_params(self, **params):
+        """
+        Sets the parameters of the QDA model.
+
+        Parameters:
+        - params: Dictionary of parameters to set.
+        """
+        self.model.set_params(**params)
+
+    def get_params(self):
+        """
+        Gets the parameters of the QDA model.
+
+        Returns:
+        - params: Dictionary of the model's parameters.
+        """
+        return self.model.get_params()
+
+    def tune_hyperparameters(self, X, y, param_grid, cv=5, scoring='accuracy', n_jobs=-1):
+        """
+        Tunes the hyperparameters of the QDA model using GridSearchCV.
+
+        Parameters:
+        - X: Features (numpy array or pandas DataFrame).
+        - y: Target variable (numpy array or pandas Series).
+        - param_grid: Dictionary with parameters names (`str`) as keys and lists of parameter settings to try as values.
+        - cv: Number of cross-validation folds (default is 5).
+        - scoring: Scoring metric to use for evaluating the model (default is 'accuracy').
+        - n_jobs: Number of jobs to run in parallel during GridSearchCV (default is -1, which uses all processors).
+
+        Returns:
+        - best_params_: Best parameters found by GridSearchCV.
+        """
+        grid_search = GridSearchCV(estimator=self.model, param_grid=param_grid, cv=cv, scoring=scoring, n_jobs=n_jobs)
+        grid_search.fit(X, y)
+        self.model = grid_search.best_estimator_
+        return grid_search.best_params_
+
+
+class AdaBoostModel:
+    def __init__(self, random_state=None, **kwargs):
+        """
+        Initializes the AdaBoostModel class with optional parameters.
+
+        Parameters:
+        - random_state: Seed for random number generation.
+        - kwargs: Additional arguments to pass to the AdaBoostClassifier model.
+        """
+        self.model = AdaBoostClassifier(random_state=random_state, **kwargs)
+        self.random_state = random_state
+
+    def train(self, X, y):
+        """
+        Trains the AdaBoost model using the provided dataset.
+
+        Parameters:
+        - X: Features (numpy array or pandas DataFrame).
+        - y: Target variable (numpy array or pandas Series).
+        """
+        self.model.fit(X, y)
+
+    def predict(self, X):
+        """
+        Predicts the target variable for the given features.
+
+        Parameters:
+        - X: Features to predict the target variable for.
+
+        Returns:
+        - Predicted target variable (numpy array).
+        """
+        return self.model.predict(X)
+
+    def predict_proba(self, X):
+        """
+        Predicts the probability of the target variable for the given features.
+
+        Parameters:
+        - X: Features to predict the target variable probabilities for.
+
+        Returns:
+        - Predicted probabilities (numpy array).
+        """
+        return self.model.predict_proba(X)
+
+    def set_params(self, **params):
+        """
+        Sets the parameters of the AdaBoost model.
+
+        Parameters:
+        - params: Dictionary of parameters to set.
+        """
+        self.model.set_params(**params)
+
+    def get_params(self):
+        """
+        Gets the parameters of the AdaBoost model.
+
+        Returns:
+        - params: Dictionary of the model's parameters.
+        """
+        return self.model.get_params()
+
+    def tune_hyperparameters(self, X, y, param_grid, cv=5, scoring='accuracy', n_jobs=-1):
+        """
+        Tunes the hyperparameters of the AdaBoost model using GridSearchCV.
+
+        Parameters:
+        - X: Features (numpy array or pandas DataFrame).
+        - y: Target variable (numpy array or pandas Series).
+        - param_grid: Dictionary with parameters names (`str`) as keys and lists of parameter settings to try as values.
+        - cv: Number of cross-validation folds (default is 5).
+        - scoring: Scoring metric to use for evaluating the model (default is 'accuracy').
+        - n_jobs: Number of jobs to run in parallel during GridSearchCV (default is -1, which uses all processors).
+
+        Returns:
+        - best_params_: Best parameters found by GridSearchCV.
+        """
+        grid_search = GridSearchCV(estimator=self.model, param_grid=param_grid, cv=cv, scoring=scoring, n_jobs=n_jobs)
+        grid_search.fit(X, y)
+        self.model = grid_search.best_estimator_
+        return grid_search.best_params_
+
+
+class KNNModel:
+    def __init__(self, **kwargs):
+        """
+        Initializes the KNNModel class with optional parameters.
+
+        Parameters:
+        - kwargs: Additional arguments to pass to the KNeighborsClassifier model.
+        """
+        self.model = KNeighborsClassifier(**kwargs)
+
+    def train(self, X, y):
+        """
+        Trains the k-NN model using the provided dataset.
+
+        Parameters:
+        - X: Features (numpy array or pandas DataFrame).
+        - y: Target variable (numpy array or pandas Series).
+        """
+        self.model.fit(X, y)
+
+    def predict(self, X):
+        """
+        Predicts the target variable for the given features.
+
+        Parameters:
+        - X: Features to predict the target variable for.
+
+        Returns:
+        - Predicted target variable (numpy array).
+        """
+        return self.model.predict(X)
+
+    def predict_proba(self, X):
+        """
+        Predicts the probability of the target variable for the given features.
+
+        Parameters:
+        - X: Features to predict the target variable probabilities for.
+
+        Returns:
+        - Predicted probabilities (numpy array).
+        """
+        return self.model.predict_proba(X)
+
+    def set_params(self, **params):
+        """
+        Sets the parameters of the k-NN model.
+
+        Parameters:
+        - params: Dictionary of parameters to set.
+        """
+        self.model.set_params(**params)
+
+    def get_params(self):
+        """
+        Gets the parameters of the k-NN model.
+
+        Returns:
+        - params: Dictionary of the model's parameters.
+        """
+        return self.model.get_params()
+
+    def tune_hyperparameters(self, X, y, param_grid, cv=5, scoring='accuracy', n_jobs=-1):
+        """
+        Tunes the hyperparameters of the k-NN model using GridSearchCV.
+
+        Parameters:
+        - X: Features (numpy array or pandas DataFrame).
+        - y: Target variable (numpy array or pandas Series).
+        - param_grid: Dictionary with parameters names (`str`) as keys and lists of parameter settings to try as values.
+        - cv: Number of cross-validation folds (default is 5).
+        - scoring: Scoring metric to use for evaluating the model (default is 'accuracy').
+        - n_jobs: Number of jobs to run in parallel during GridSearchCV (default is -1, which uses all processors).
+
+        Returns:
+        - best_params_: Best parameters found by GridSearchCV.
+        """
+        grid_search = GridSearchCV(estimator=self.model, param_grid=param_grid, cv=cv, scoring=scoring, n_jobs=n_jobs)
+        grid_search.fit(X, y)
+        self.model = grid_search.best_estimator_
+        return grid_search.best_params_
 
 
 class GBMModel:
