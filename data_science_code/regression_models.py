@@ -5,6 +5,8 @@ from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, A
 from sklearn.svm import SVR
 from sklearn.neural_network import MLPRegressor
 from xgboost import XGBRegressor
+from sklearn.inspection import permutation_importance
+import numpy as np
 
 
 regression_models = ["""Regression Models: 
@@ -13,6 +15,7 @@ regression_models = ["""Regression Models:
                      """]
 for model in regression_models:
     print(model)
+
 
 class ModelTrainer:
     def __init__(self, model_type='linear_regression', random_state=None, **kwargs):
@@ -122,10 +125,40 @@ class ModelTrainer:
         self.model = grid_search.best_estimator_
         return grid_search.best_params_
 
-# Example usage:
-trainer = ModelTrainer(model_type='xgboost', random_state=42, n_estimators=100)
-trainer.train(X_train, y_train)
-predictions = trainer.predict(X_test)
-params = trainer.get_params()
-trainer.set_params(learning_rate=0.01)
-best_params = trainer.tune_hyperparameters(X_train, y_train, param_grid={'n_estimators': [50, 100, 200]})
+    def get_feature_importance(self, X=None, y=None):
+        """
+        Returns the feature importance of the trained model.
+
+        Parameters:
+        - X: Features (numpy array or pandas DataFrame). Required for permutation importance.
+        - y: Target variable (numpy array or pandas Series). Required for permutation importance.
+
+        Returns:
+        - feature_importances: Array of feature importances.
+        """
+        # Ensure X has feature names (needed for the DataFrame)
+        feature_names = X.columns if isinstance(X, pd.DataFrame) else [f'Feature {i}' for i in range(X.shape[1])]
+
+        if hasattr(self.model, 'feature_importances_'):
+            # For models like RandomForest, GradientBoosting, XGBoost
+            importances = self.model.feature_importances_
+        elif hasattr(self.model, 'coef_'):
+            # For linear models
+            importances = np.abs(self.model.coef_)
+        elif X is not None and y is not None:
+            # Use permutation importance for models that do not have built-in feature importance
+            result = permutation_importance(self.model, X, y, n_repeats=10, random_state=self.random_state, n_jobs=-1)
+            importances = result.importances_mean
+        else:
+            raise ValueError("Feature importance not available for this model type. Provide X and y for permutation importance.")
+
+        # Create a DataFrame with feature names and importances
+        feature_importances_df = pd.DataFrame({
+            'Feature': feature_names,
+            'Importance': importances
+        })
+
+        # Sort the DataFrame by importance in descending order
+        feature_importances_df = feature_importances_df.sort_values(by='Importance', ascending=False).reset_index(drop=True)
+
+        return feature_importances_df
